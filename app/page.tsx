@@ -94,55 +94,87 @@ export default function WhisperTranscription() {
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Whisper Transcription</h1>
-      <Card>
-        <CardHeader>
-          <CardTitle>Audio Input</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="upload">
-            <TabsList>
-              <TabsTrigger value="upload">Upload</TabsTrigger>
-              <TabsTrigger value="record">Record</TabsTrigger>
-              <TabsTrigger value="url">URL</TabsTrigger>
-            </TabsList>
-            <TabsContent value="upload">
-              <Input type="file" accept="audio/*" onChange={handleFileUpload} />
-            </TabsContent>
-            <TabsContent value="record">
-              <AudioRecorder onRecordingComplete={setAudioFile} />
-            </TabsContent>
-            <TabsContent value="url">
-              <Input
-                type="url"
-                placeholder="Enter audio URL"
-                value={audioUrl}
-                onChange={(e) => setAudioUrl(e.target.value)}
-              />
-            </TabsContent>
-          </Tabs>
-          <Button onClick={handleTranscribe} disabled={isLoading} className="mt-4">
-            {isLoading ? 'Transcribing...' : 'Transcribe'}
-          </Button>
-        </CardContent>
-      </Card>
-      <Card className="mt-4">
-        <CardHeader>
-          <CardTitle>Transcription Output</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <h3 className="text-lg font-semibold mb-2">Segmented Transcription:</h3>
-          <div className="space-y-2 mb-4">
-            {displayedTranscription.map((segment, index) => (
-              <div key={index} className="border p-2 rounded">
-                <span className="font-medium">{formatTime(segment.start)} - {formatTime(segment.end)}:</span> {segment.text}
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container max-w-4xl mx-auto p-4 space-y-6">
+        <div className="text-center py-8">
+          <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+            Whisper Transcription
+          </h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">
+            Upload, record, or provide a URL to transcribe audio
+          </p>
+        </div>
+
+        <Card className="shadow-lg">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl">Audio Input</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="upload" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 mb-4">
+                <TabsTrigger value="upload">Upload</TabsTrigger>
+                <TabsTrigger value="record">Record</TabsTrigger>
+                <TabsTrigger value="url">URL</TabsTrigger>
+              </TabsList>
+              <TabsContent value="upload" className="mt-4">
+                <Input 
+                  type="file" 
+                  accept="audio/*" 
+                  onChange={handleFileUpload}
+                  className="hover:cursor-pointer" 
+                />
+              </TabsContent>
+              <TabsContent value="record" className="mt-4">
+                <AudioRecorder onRecordingComplete={setAudioFile} />
+              </TabsContent>
+              <TabsContent value="url" className="mt-4">
+                <Input
+                  type="url"
+                  placeholder="Enter audio URL"
+                  value={audioUrl}
+                  onChange={(e) => setAudioUrl(e.target.value)}
+                  className="focus:ring-2 focus:ring-blue-500"
+                />
+              </TabsContent>
+            </Tabs>
+            <div className="mt-6 flex justify-center">
+              <Button 
+                onClick={handleTranscribe} 
+                disabled={isLoading}
+                className="w-full md:w-auto px-8 py-2 text-lg"
+              >
+                {isLoading ? 'Transcribing...' : 'Transcribe'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {displayedTranscription.length > 0 && (
+          <Card className="shadow-lg">
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-2xl">Transcription Output</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {displayedTranscription.map((segment, index) => (
+                  <div 
+                    key={index} 
+                    className="flex flex-col space-y-2 p-4 rounded-lg bg-white dark:bg-gray-800 shadow-sm"
+                  >
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      {formatTime(segment.start)} - {formatTime(segment.end)}
+                    </span>
+                    <p className="text-gray-900 dark:text-gray-100 text-lg">
+                      {segment.text}
+                    </p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </main>
   )
 }
 
