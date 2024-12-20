@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -25,21 +25,11 @@ export default function WhisperTranscription() {
   const [currentCharIndex, setCurrentCharIndex] = useState(0) // New state
   const [segmentQueue, setSegmentQueue] = useState<TranscriptionSegment[]>([])
   const [isTyping, setIsTyping] = useState(false)
-  const transcriptionContainerRef = useRef<HTMLDivElement>(null)
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
       setAudioFile(file)
-    }
-  }
-
-  const scrollToBottom = () => {
-    if (transcriptionContainerRef.current) {
-      transcriptionContainerRef.current.scrollTo({
-        top: transcriptionContainerRef.current.scrollHeight,
-        behavior: 'smooth'
-      })
     }
   }
 
@@ -54,7 +44,6 @@ export default function WhisperTranscription() {
         // Add the current version of the segment
         return [...filtered, { ...segment, text: currentText }]
       })
-      scrollToBottom() // Scroll after each update
       await new Promise(resolve => setTimeout(resolve, 30))
     }
   }
@@ -191,10 +180,7 @@ export default function WhisperTranscription() {
               <CardTitle className="text-2xl">Transcription Output</CardTitle>
             </CardHeader>
             <CardContent>
-              <div 
-                ref={transcriptionContainerRef}
-                className="space-y-4 max-h-[500px] overflow-y-auto" // Added max-height and overflow
-              >
+              <div className="space-y-4">
                 {displayedTranscription.map((segment, index) => (
                   <div 
                     key={index} 
