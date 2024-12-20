@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import AudioRecorder from '@/components/AudioRecorder'
@@ -17,14 +16,10 @@ interface TranscriptionSegment {
 export default function WhisperTranscription() {
   const [audioFile, setAudioFile] = useState<File | null>(null)
   const [audioUrl, setAudioUrl] = useState('')
-  const [transcription, setTranscription] = useState<TranscriptionSegment[]>([])
-  const [fullText, setFullText] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
   const [displayedTranscription, setDisplayedTranscription] = useState<TranscriptionSegment[]>([]) // Existing state
-  const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0) // New state
-  const [currentCharIndex, setCurrentCharIndex] = useState(0) // New state
   const [segmentQueue, setSegmentQueue] = useState<TranscriptionSegment[]>([])
   const [isTyping, setIsTyping] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -70,8 +65,6 @@ export default function WhisperTranscription() {
   const handleTranscribe = async () => {
     setIsLoading(true)
     setDisplayedTranscription([]) // Reset displayed transcription
-    setCurrentSegmentIndex(0) // Reset segment index
-    setCurrentCharIndex(0) // Reset character index
     setSegmentQueue([])
     try {
       const formData = new FormData()
@@ -209,4 +202,3 @@ export default function WhisperTranscription() {
     </main>
   )
 }
-
