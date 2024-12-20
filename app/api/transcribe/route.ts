@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { slidingWindowTranscription } from '@/lib/slidingWindowTranscription'
 
-// Add route segment config
+// Route segment configuration
 export const dynamic = 'force-dynamic'
 export const runtime = 'edge'
 export const preferredRegion = 'auto'
