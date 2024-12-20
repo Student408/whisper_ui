@@ -1,101 +1,126 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import AudioRecorder from '@/components/AudioRecorder'
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+interface TranscriptionSegment {
+  text: string
+  start: number
+  end: number
 }
+
+export default function WhisperTranscription() {
+  const [audioFile, setAudioFile] = useState<File | null>(null)
+  const [audioUrl, setAudioUrl] = useState('')
+  const [transcription, setTranscription] = useState<TranscriptionSegment[]>([])
+  const [fullText, setFullText] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      setAudioFile(file)
+    }
+  }
+
+  const handleTranscribe = async () => {
+    setIsLoading(true)
+    try {
+      const formData = new FormData()
+      if (audioFile) {
+        formData.append('file', audioFile)
+      } else if (audioUrl) {
+        formData.append('url', audioUrl)
+      }
+
+      const response = await fetch('/api/transcribe', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error('Transcription failed')
+      }
+
+      const result = await response.json()
+      setTranscription(result.segments)
+      setFullText(result.fullText)
+    } catch (error) {
+      console.error('Transcription error:', error)
+      setTranscription([])
+      setFullText('Error occurred during transcription')
+    }
+    setIsLoading(false)
+  }
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60)
+    const remainingSeconds = Math.floor(seconds % 60)
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+  }
+
+  return (
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Whisper Transcription</h1>
+      <Card>
+        <CardHeader>
+          <CardTitle>Audio Input</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="upload">
+            <TabsList>
+              <TabsTrigger value="upload">Upload</TabsTrigger>
+              <TabsTrigger value="record">Record</TabsTrigger>
+              <TabsTrigger value="url">URL</TabsTrigger>
+            </TabsList>
+            <TabsContent value="upload">
+              <Input type="file" accept="audio/*" onChange={handleFileUpload} />
+            </TabsContent>
+            <TabsContent value="record">
+              <AudioRecorder onRecordingComplete={setAudioFile} />
+            </TabsContent>
+            <TabsContent value="url">
+              <Input
+                type="url"
+                placeholder="Enter audio URL"
+                value={audioUrl}
+                onChange={(e) => setAudioUrl(e.target.value)}
+              />
+            </TabsContent>
+          </Tabs>
+          <Button onClick={handleTranscribe} disabled={isLoading} className="mt-4">
+            {isLoading ? 'Transcribing...' : 'Transcribe'}
+          </Button>
+        </CardContent>
+      </Card>
+      <Card className="mt-4">
+        <CardHeader>
+          <CardTitle>Transcription Output</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <h3 className="text-lg font-semibold mb-2">Segmented Transcription:</h3>
+          <div className="space-y-2 mb-4">
+            {transcription.map((segment, index) => (
+              <div key={index} className="border p-2 rounded">
+                <span className="font-medium">{formatTime(segment.start)} - {formatTime(segment.end)}:</span> {segment.text}
+              </div>
+            ))}
+          </div>
+          <h3 className="text-lg font-semibold mb-2">Full Transcription:</h3>
+          <Textarea
+            value={fullText}
+            readOnly
+            placeholder="Full transcription will appear here..."
+            rows={10}
+          />
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
