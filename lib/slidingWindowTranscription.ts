@@ -17,7 +17,8 @@ interface TranscriptionSegment {
 export async function slidingWindowTranscription(
   audioBuffer: ArrayBuffer,
   chunkLengthMs: number = 30000,
-  strideLengthMs: number = 15000
+  strideLengthMs: number = 15000,
+  onTranscription?: (segment: TranscriptionSegment) => void // Added callback parameter
 ): Promise<TranscriptionSegment[]> {
   const sampleRate = 16000 // Whisper model expects 16kHz audio
   const bytesPerSample = 2 // Assuming 16-bit audio
@@ -49,6 +50,21 @@ export async function slidingWindowTranscription(
         start: start / (sampleRate * bytesPerSample),
         end: end / (sampleRate * bytesPerSample),
       })
+
+      // Invoke the callback with the new transcription segment
+      if (onTranscription) {
+        onTranscription({
+          text: result.text,
+          start: start / (sampleRate * bytesPerSample),
+          end: end / (sampleRate * bytesPerSample),
+        })
+      }
+
+      // Remove the delay to allow continuous transcription
+      // await new Promise(resolve => setTimeout(resolve, 1000)) // 1 second delay
+
+      // Optionally, handle the processed text immediately
+      console.log(`Processed text for ${start / bytesPerSample} seconds: ${result.text}`)
     } catch (error) {
       console.error('Error processing chunk:', error)
     }
