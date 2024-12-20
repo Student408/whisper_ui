@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { slidingWindowTranscription } from '@/lib/slidingWindowTranscription'
 
+// Add route segment config
+export const dynamic = 'force-dynamic'
+export const runtime = 'edge'
+export const preferredRegion = 'auto'
+
 export async function POST(req: NextRequest) {
   try {
     const data = await req.formData()
@@ -39,6 +44,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Transcription failed' }, { status: 500 })
   }
 }
-
-export const runtime = 'edge'
 
