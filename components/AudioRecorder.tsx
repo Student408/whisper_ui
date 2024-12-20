@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 
 interface AudioRecorderProps {
@@ -9,8 +9,13 @@ interface AudioRecorderProps {
 
 export default function AudioRecorder({ onRecordingComplete }: AudioRecorderProps) {
   const [isRecording, setIsRecording] = useState(false)
+  const [isClient, setIsClient] = useState(false)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   const startRecording = async () => {
     try {
@@ -41,6 +46,10 @@ export default function AudioRecorder({ onRecordingComplete }: AudioRecorderProp
     }
   }
 
+  if (!isClient) {
+    return null // Return null on server-side to prevent hydration mismatch
+  }
+
   return (
     <div>
       {isRecording ? (
@@ -53,4 +62,3 @@ export default function AudioRecorder({ onRecordingComplete }: AudioRecorderProp
     </div>
   )
 }
-
