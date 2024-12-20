@@ -52,8 +52,6 @@ export async function slidingWindowTranscription(
     } catch (error) {
       console.error('Error processing chunk:', error)
     }
-
-    if (end === audioData.length * bytesPerSample) break
   }
 
   return transcription
