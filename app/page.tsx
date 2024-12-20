@@ -180,7 +180,14 @@ export default function WhisperTranscription() {
               <CardTitle className="text-2xl">Transcription Output</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div 
+                className="space-y-4 max-h-[60vh] overflow-y-auto pr-4 scrollbar-hide"
+                style={{
+                  scrollbarWidth: 'none',  /* Firefox */
+                  msOverflowStyle: 'none',  /* IE and Edge */
+                  WebkitOverflowScrolling: 'touch',
+                }}
+              >
                 {displayedTranscription.map((segment, index) => (
                   <div 
                     key={index} 
