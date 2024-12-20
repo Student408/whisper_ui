@@ -119,7 +119,7 @@ export default function WhisperTranscription() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-y-auto scrollbar-hide">
       <div className="container max-w-4xl mx-auto p-4 space-y-6">
         <div className="text-center py-8">
           <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
