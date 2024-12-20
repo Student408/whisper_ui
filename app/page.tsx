@@ -140,13 +140,6 @@ export default function WhisperTranscription() {
               </div>
             ))}
           </div>
-          <h3 className="text-lg font-semibold mb-2">Full Transcription:</h3>
-          <Textarea
-            value={fullText}
-            readOnly
-            placeholder="Full transcription will appear here..."
-            rows={10}
-          />
         </CardContent>
       </Card>
     </div>
