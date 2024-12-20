@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -20,6 +20,9 @@ export default function WhisperTranscription() {
   const [transcription, setTranscription] = useState<TranscriptionSegment[]>([])
   const [fullText, setFullText] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [displayedTranscription, setDisplayedTranscription] = useState<TranscriptionSegment[]>([]) // Existing state
+  const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0) // New state
+  const [currentCharIndex, setCurrentCharIndex] = useState(0) // New state
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -30,6 +33,9 @@ export default function WhisperTranscription() {
 
   const handleTranscribe = async () => {
     setIsLoading(true)
+    setDisplayedTranscription([]) // Reset displayed transcription
+    setCurrentSegmentIndex(0) // Reset segment index
+    setCurrentCharIndex(0) // Reset character index
     try {
       const formData = new FormData()
       if (audioFile) {
@@ -50,12 +56,35 @@ export default function WhisperTranscription() {
       const result = await response.json()
       setTranscription(result.segments)
       setFullText(result.fullText)
+
+      // Start typing simulation per letter
+      simulateTyping(result.segments)
     } catch (error) {
       console.error('Transcription error:', error)
       setTranscription([])
       setFullText('Error occurred during transcription')
     }
     setIsLoading(false)
+  }
+
+  const simulateTyping = async (segments: TranscriptionSegment[]) => {
+    for (let i = 0; i < segments.length; i++) {
+      const segment = segments[i]
+      let currentText = ''
+      for (let j = 0; j < segment.text.length; j++) {
+        currentText += segment.text[j]
+        setDisplayedTranscription(prev => {
+          const newTranscription = [...prev]
+          if (newTranscription[i]) {
+            newTranscription[i].text = currentText
+          } else {
+            newTranscription[i] = { ...segment, text: currentText }
+          }
+          return newTranscription
+        })
+        await new Promise(resolve => setTimeout(resolve, 50)) // 50ms per character
+      }
+    }
   }
 
   const formatTime = (seconds: number) => {
@@ -105,7 +134,7 @@ export default function WhisperTranscription() {
         <CardContent>
           <h3 className="text-lg font-semibold mb-2">Segmented Transcription:</h3>
           <div className="space-y-2 mb-4">
-            {transcription.map((segment, index) => (
+            {displayedTranscription.map((segment, index) => (
               <div key={index} className="border p-2 rounded">
                 <span className="font-medium">{formatTime(segment.start)} - {formatTime(segment.end)}:</span> {segment.text}
               </div>
